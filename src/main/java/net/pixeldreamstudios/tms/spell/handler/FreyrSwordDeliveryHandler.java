@@ -27,7 +27,7 @@ import java.util.UUID;
 
 public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
 
-    private static final int BASE_LIFETIME_TICKS = 600; // 30 seconds base
+    private static final int BASE_LIFETIME_TICKS = 600;
     private static final boolean ALLOW_INTERACTION = false;
 
     @Override
@@ -49,7 +49,6 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             return false;
         }
 
-        // Get max summons from Summoner Lib attribute
         int maxSummons = SummonManager.getMaxSummons(caster);
         int currentCount = SummonTracker.getPlayerSummonCountByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
 
@@ -90,16 +89,13 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         freyrSword.setYaw(player.getYaw());
         freyrSword.setStationaryPos(FreyrSwordEntity.NULLISH_POS);
 
-        // Apply scale
         if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE) != null) {
-            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(0.5);
+            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(0.75);
         }
 
-        // Calculate lifetime from duration attribute
         double durationMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DURATION);
         int lifetime = (int) (BASE_LIFETIME_TICKS * durationMultiplier);
 
-        // Apply damage and health multipliers
         double damageMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DAMAGE);
         double healthMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_HEALTH);
 
@@ -122,7 +118,6 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             return;
         }
 
-        // Register with tracking system
         ExtendedFreyrSwordData.registerSpellSummon(player, freyrSword, world, lifetime, ALLOW_INTERACTION);
 
         player.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0F, 1.0F);

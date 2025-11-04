@@ -16,10 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * FreyrSword-specific summon management using SoulsWeaponry's IEntityDataSaver.
- * This class bridges SoulsWeaponry's data system with Summoner Lib's tracking.
- */
 public class ExtendedFreyrSwordData {
 
     private static final String SPELL_SUMMONS_KEY = "tms_spell_summons";
@@ -29,10 +25,8 @@ public class ExtendedFreyrSwordData {
     public static void registerSpellSummon(PlayerEntity owner, FreyrSwordEntity entity, ServerWorld world, int lifetimeTicks, boolean allowInteraction) {
         UUID entityUuid = entity.getUuid();
 
-        // Store in SoulsWeaponry's NBT system
         addSpellSummonUuid(owner, entityUuid);
 
-        // Register with Summoner Lib
         SummonManager.registerSummon(
                 owner,
                 entity,
@@ -45,10 +39,8 @@ public class ExtendedFreyrSwordData {
     }
 
     public static void unregisterSpellSummon(PlayerEntity owner, UUID entityUuid) {
-        // Remove from SoulsWeaponry's NBT system
         removeSpellSummonUuid(owner, entityUuid);
 
-        // Unregister from Summoner Lib
         if (!owner.getWorld().isClient() && owner.getWorld() instanceof ServerWorld serverWorld) {
             SummonTracker.unregisterSummon(serverWorld, entityUuid);
         } else {

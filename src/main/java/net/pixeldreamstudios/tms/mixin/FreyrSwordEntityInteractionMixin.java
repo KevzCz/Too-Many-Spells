@@ -76,7 +76,6 @@ public class FreyrSwordEntityInteractionMixin {
             return;
         }
 
-        // Unregister from tracking
         if (entity.getOwnerUuid() != null) {
             PlayerEntity owner = entity.getWorld().getPlayerByUuid(entity.getOwnerUuid());
             if (owner != null && ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
@@ -85,13 +84,12 @@ public class FreyrSwordEntityInteractionMixin {
         }
     }
 
-    // Prevent dropping items on death
     @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/soulsweaponry/entity/mobs/FreyrSwordEntity;insertStack(Lnet/minecraft/entity/player/PlayerEntity;)Z"), cancellable = true)
     private void preventSpellSummonDropOnDeath(DamageSource damageSource, CallbackInfo ci) {
         FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
 
         if (ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
-            ci.cancel(); // Skip the entire drop/insert logic
+            ci.cancel();
         }
     }
 }
