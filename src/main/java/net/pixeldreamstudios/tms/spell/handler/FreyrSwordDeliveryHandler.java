@@ -11,12 +11,15 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.pixeldreamstudios.summonerlib.attribute.SummonerAttributes;
+import net.pixeldreamstudios.summonerlib.data.SummonData;
+import net.pixeldreamstudios.summonerlib.manager.SummonManager;
+import net.pixeldreamstudios.summonerlib.tracker.SummonTracker;
 import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
-import net.pixeldreamstudios.tms.util.SummonTracker;
+import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellHelper;
-import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,8 +27,7 @@ import java.util.UUID;
 
 public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
 
-    private static final int LIFETIME_TICKS = 600;
-    private static final int DEFAULT_MAX_SUMMONS = 3;
+    private static final int BASE_LIFETIME_TICKS = 600; // 30 seconds base
     private static final boolean ALLOW_INTERACTION = false;
 
     @Override
@@ -47,13 +49,14 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             return false;
         }
 
-        int maxSummons = getMaxSummons(caster);
+        // Get max summons from Summoner Lib attribute
+        int maxSummons = SummonManager.getMaxSummons(caster);
         int currentCount = SummonTracker.getPlayerSummonCountByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
 
         if (currentCount >= maxSummons) {
             UUID oldestUuid = SummonTracker.getOldestSummonByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
             if (oldestUuid != null) {
-                SummonTracker.SummonData oldData = SummonTracker.getSummonData(oldestUuid);
+                SummonData oldData = SummonTracker.getSummonData(oldestUuid);
                 if (oldData != null) {
                     Entity oldEntity = oldData.getEntity();
                     if (oldEntity != null) {
@@ -87,8 +90,30 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         freyrSword.setYaw(player.getYaw());
         freyrSword.setStationaryPos(FreyrSwordEntity.NULLISH_POS);
 
+        // Apply scale
         if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE) != null) {
             freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(0.5);
+        }
+
+        // Calculate lifetime from duration attribute
+        double durationMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DURATION);
+        int lifetime = (int) (BASE_LIFETIME_TICKS * durationMultiplier);
+
+        // Apply damage and health multipliers
+        double damageMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DAMAGE);
+        double healthMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_HEALTH);
+
+        if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE) != null) {
+            double baseDamage = freyrSword.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)
+                    .setBaseValue(baseDamage * damageMultiplier);
+        }
+
+        if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH) != null) {
+            double baseHealth = freyrSword.getAttributeValue(EntityAttributes.GENERIC_MAX_HEALTH);
+            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)
+                    .setBaseValue(baseHealth * healthMultiplier);
+            freyrSword.setHealth(freyrSword.getMaxHealth());
         }
 
         boolean spawned = world.spawnEntity(freyrSword);
@@ -97,9 +122,8 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             return;
         }
 
-        UUID entityUuid = freyrSword.getUuid();
-
-        ExtendedFreyrSwordData.registerSpellSummon(player, freyrSword, world, LIFETIME_TICKS, ALLOW_INTERACTION);
+        // Register with tracking system
+        ExtendedFreyrSwordData.registerSpellSummon(player, freyrSword, world, lifetime, ALLOW_INTERACTION);
 
         player.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0F, 1.0F);
     }
@@ -117,9 +141,5 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         z += placement.location_offset_z;
 
         return new Vec3d(x, y, z);
-    }
-
-    private int getMaxSummons(PlayerEntity player) {
-        return DEFAULT_MAX_SUMMONS;
     }
 }

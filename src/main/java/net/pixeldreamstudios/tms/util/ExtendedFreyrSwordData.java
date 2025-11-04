@@ -7,6 +7,8 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
+import net.pixeldreamstudios.summonerlib.manager.SummonManager;
+import net.pixeldreamstudios.summonerlib.tracker.SummonTracker;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.soulsweaponry.entitydata.IEntityDataSaver;
 
@@ -14,23 +16,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * FreyrSword-specific summon management using SoulsWeaponry's IEntityDataSaver.
+ * This class bridges SoulsWeaponry's data system with Summoner Lib's tracking.
+ */
 public class ExtendedFreyrSwordData {
 
     private static final String SPELL_SUMMONS_KEY = "tms_spell_summons";
     private static final String ORIGINAL_SUMMON_KEY = "freyr_sword_summon_uuid";
-    public static final String SUMMON_TYPE = "freyr_sword";
+    public static final String SUMMON_TYPE = "too-many-spells:freyr_sword";
 
     public static void registerSpellSummon(PlayerEntity owner, FreyrSwordEntity entity, ServerWorld world, int lifetimeTicks, boolean allowInteraction) {
         UUID entityUuid = entity.getUuid();
 
+        // Store in SoulsWeaponry's NBT system
         addSpellSummonUuid(owner, entityUuid);
 
-        SummonTracker.registerSummon(owner, entity, world.getTime(), lifetimeTicks, allowInteraction, SUMMON_TYPE, true);
+        // Register with Summoner Lib
+        SummonManager.registerSummon(
+                owner,
+                entity,
+                world,
+                lifetimeTicks,
+                allowInteraction,
+                SUMMON_TYPE,
+                false
+        );
     }
 
     public static void unregisterSpellSummon(PlayerEntity owner, UUID entityUuid) {
+        // Remove from SoulsWeaponry's NBT system
         removeSpellSummonUuid(owner, entityUuid);
 
+        // Unregister from Summoner Lib
         if (!owner.getWorld().isClient() && owner.getWorld() instanceof ServerWorld serverWorld) {
             SummonTracker.unregisterSummon(serverWorld, entityUuid);
         } else {
@@ -39,7 +57,7 @@ public class ExtendedFreyrSwordData {
     }
 
     public static boolean isSpellSummon(UUID entityUuid) {
-        SummonTracker.SummonData data = SummonTracker.getSummonData(entityUuid);
+        var data = SummonTracker.getSummonData(entityUuid);
         return data != null && SUMMON_TYPE.equals(data.summonType);
     }
 

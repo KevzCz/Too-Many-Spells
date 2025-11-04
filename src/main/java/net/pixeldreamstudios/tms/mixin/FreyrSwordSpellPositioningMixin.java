@@ -3,7 +3,8 @@ package net.pixeldreamstudios.tms.mixin;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
-import net.pixeldreamstudios.tms.util.SummonTracker;
+import net.pixeldreamstudios.summonerlib.tracker.SummonTracker;
+import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,8 +21,8 @@ public class FreyrSwordSpellPositioningMixin {
     private void customSpellSummonPositioning(CallbackInfo ci) {
         FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
 
-        SummonTracker.SummonData data = SummonTracker.getSummonData(entity.getUuid());
-        if (data == null || !data.summonType.equals("freyr_sword")) {
+        var data = SummonTracker.getSummonData(entity.getUuid());
+        if (data == null || !ExtendedFreyrSwordData.SUMMON_TYPE.equals(data.summonType)) {
             return;
         }
 
@@ -54,7 +55,10 @@ public class FreyrSwordSpellPositioningMixin {
             return 0;
         }
 
-        List<UUID> allSummons = SummonTracker.getPlayerSummonsByType(player.getUuid(), "freyr_sword");
+        List<UUID> allSummons = SummonTracker.getPlayerSummonsByType(
+                player.getUuid(),
+                ExtendedFreyrSwordData.SUMMON_TYPE
+        );
         int index = allSummons.indexOf(entity.getUuid());
         return index >= 0 ? index : 0;
     }
@@ -64,7 +68,6 @@ public class FreyrSwordSpellPositioningMixin {
         double arcSpread = Math.PI * 0.5;
 
         float ownerYawRad = owner.getYaw() * (float) Math.PI / 180.0F;
-
         double behindAngle = ownerYawRad + Math.PI;
 
         double offsetAngle;
@@ -76,12 +79,10 @@ public class FreyrSwordSpellPositioningMixin {
         }
 
         double finalAngle = behindAngle + offsetAngle;
-
         double offsetX = -Math.sin(finalAngle) * radius;
         double offsetZ = Math.cos(finalAngle) * radius;
 
         Vec3d targetPos = owner.getPos().add(offsetX, 0, offsetZ);
-
         float swordYaw = (float) Math.toDegrees(finalAngle);
 
         entity.updatePositionAndAngles(
@@ -95,7 +96,10 @@ public class FreyrSwordSpellPositioningMixin {
 
     private int getTotalSummons(LivingEntity owner) {
         if (owner instanceof PlayerEntity player) {
-            return SummonTracker.getPlayerSummonCountByType(player.getUuid(), "freyr_sword");
+            return SummonTracker.getPlayerSummonCountByType(
+                    player.getUuid(),
+                    ExtendedFreyrSwordData.SUMMON_TYPE
+            );
         }
         return 1;
     }

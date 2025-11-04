@@ -32,7 +32,9 @@
 		"fabricloader": ">=0.16.0",
 		"minecraft": "~1.21.1",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"spell_engine": "*",
+		"summoner-lib": "*"
 	},
 	"suggests": {
 		"another-mod": "*"

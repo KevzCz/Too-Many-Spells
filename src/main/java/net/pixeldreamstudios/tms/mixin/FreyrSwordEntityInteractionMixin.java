@@ -4,8 +4,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.pixeldreamstudios.summonerlib.tracker.ClientSummonTracker;
 import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
-import net.pixeldreamstudios.tms.util.SummonTracker;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,18 +21,15 @@ public class FreyrSwordEntityInteractionMixin {
         FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
 
         if (entity.getWorld().isClient()) {
-
-            if (SummonTracker.clientIsSpellSummon(entity.getUuid())) {
+            if (ClientSummonTracker.isSpellSummon(entity.getUuid())) {
                 cir.setReturnValue(ActionResult.SUCCESS);
             }
         } else {
-
-            if (ExtendedFreyrSwordData.isSpellSummon(player, entity.getUuid())) {
+            if (ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
                 cir.setReturnValue(ActionResult.PASS);
             }
         }
     }
-
 
     @Inject(method = "dropStack()V", at = @At("HEAD"), cancellable = true)
     private void preventSpellSummonDropStack(CallbackInfo ci) {
@@ -42,8 +39,7 @@ public class FreyrSwordEntityInteractionMixin {
             return;
         }
 
-
-        if (isAnyPlayerSpellSummon(entity)) {
+        if (ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
             ci.cancel();
         }
     }
@@ -52,7 +48,7 @@ public class FreyrSwordEntityInteractionMixin {
     private void preventSpellSummonInsert(PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
         FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
 
-        if (ExtendedFreyrSwordData.isSpellSummon(player, entity.getUuid())) {
+        if (ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
             cir.setReturnValue(false);
         }
     }
@@ -66,7 +62,7 @@ public class FreyrSwordEntityInteractionMixin {
         }
 
         if (source.getAttacker() instanceof PlayerEntity attacker) {
-            if (ExtendedFreyrSwordData.isSpellSummon(attacker, entity.getUuid())) {
+            if (ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
                 cir.setReturnValue(false);
             }
         }
@@ -80,21 +76,22 @@ public class FreyrSwordEntityInteractionMixin {
             return;
         }
 
+        // Unregister from tracking
         if (entity.getOwnerUuid() != null) {
             PlayerEntity owner = entity.getWorld().getPlayerByUuid(entity.getOwnerUuid());
-            if (owner != null) {
-                ExtendedFreyrSwordData.unregisterSpellSummon(owner, entity.getUuid()); // ← UPDATED
+            if (owner != null && ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
+                ExtendedFreyrSwordData.unregisterSpellSummon(owner, entity.getUuid());
             }
         }
     }
 
-    private boolean isAnyPlayerSpellSummon(FreyrSwordEntity entity) {
-        if (entity.getOwnerUuid() != null) {
-            PlayerEntity owner = entity.getWorld().getPlayerByUuid(entity.getOwnerUuid());
-            if (owner != null) {
-                return ExtendedFreyrSwordData.isSpellSummon(owner, entity.getUuid());
-            }
+    // Prevent dropping items on death
+    @Inject(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/soulsweaponry/entity/mobs/FreyrSwordEntity;insertStack(Lnet/minecraft/entity/player/PlayerEntity;)Z"), cancellable = true)
+    private void preventSpellSummonDropOnDeath(DamageSource damageSource, CallbackInfo ci) {
+        FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
+
+        if (ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
+            ci.cancel(); // Skip the entire drop/insert logic
         }
-        return false;
     }
 }
