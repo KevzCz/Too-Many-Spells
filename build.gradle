@@ -32,6 +32,20 @@ repositories {
 	mavenCentral()
 }
 
+loom {
+	runs {
+		datagen {
+			inherit server
+			name "Data Generation"
+			vmArg "-Dfabric-api.datagen"
+			vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+			vmArg "-Dfabric-api.datagen.modid=too-many-spells"
+
+			runDir "build/datagen"
+		}
+	}
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -52,6 +66,19 @@ dependencies {
 	modRuntimeOnly("dev.kosmx.player-anim:player-animation-lib-fabric:${project.player_anim}")
 	modCompileOnly "curse.maven:bookshelf-${project.bookshelf}"
 	modCompileOnly "curse.maven:prickle-${project.prickle}"
+
+	modImplementation("maven.modrinth:tiny-config:${project.tiny_config_version}-fabric")
+
+}
+
+sourceSets {
+	main {
+		resources {
+			srcDirs += [
+					'src/main/generated'
+			]
+		}
+	}
 }
 
 processResources {
