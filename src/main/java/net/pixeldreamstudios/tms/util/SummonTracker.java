@@ -65,7 +65,7 @@ public class SummonTracker {
         }
     }
 
-    public static void registerSummon(PlayerEntity owner, Entity entity, long spawnTick, int lifetimeTicks, boolean allowInteraction, String summonType) {
+    public static void registerSummon(PlayerEntity owner, Entity entity, long spawnTick, int lifetimeTicks, boolean allowInteraction, String summonType, boolean persistentTimer) {
         UUID ownerUuid = owner.getUuid();
         UUID entityUuid = entity.getUuid();
 
@@ -81,15 +81,13 @@ public class SummonTracker {
             syncToClients(serverWorld, entityUuid, true);
         }
 
-        TooManySpells.LOGGER.info("✓ Registered {} spell summon: {} [Index: {}]", summonType, entityUuid, summonIndex);
-        TooManySpells.LOGGER.info("  - Owner: {} ({})", owner.getName().getString(), ownerUuid);
-        TooManySpells.LOGGER.info("  - Lifetime: {} ticks", lifetimeTicks);
-        TooManySpells.LOGGER.info("  - Total summons for player: {}", playerSummons.size());
+        TooManySpells.LOGGER.info("Registered {} summon: {} for owner {} (index: {})", summonType, entityUuid, ownerUuid, summonIndex);
     }
 
     public static void unregisterSummon(UUID entityUuid) {
         SummonData data = ENTITY_LOOKUP.remove(entityUuid);
         if (data != null) {
+            TooManySpells.LOGGER.info("Unregistering {} summon: {}", data.summonType, entityUuid);
             List<SummonData> playerSummons = PLAYER_SUMMONS.get(data.ownerUuid);
             if (playerSummons != null) {
                 playerSummons.removeIf(s -> s.entityUuid.equals(entityUuid));
@@ -193,6 +191,14 @@ public class SummonTracker {
         List<UUID> playersToRemove = new ArrayList<>();
 
         PLAYER_SUMMONS.forEach((ownerUuid, summons) -> {
+            PlayerEntity owner = null;
+            for (ServerWorld serverWorld : world.getServer().getWorlds()) {
+                owner = serverWorld.getPlayerByUuid(ownerUuid);
+                if (owner != null) break;
+            }
+
+            PlayerEntity finalOwner = owner;
+
             summons.removeIf(data -> {
                 Entity entity = data.getEntity();
 
@@ -203,6 +209,7 @@ public class SummonTracker {
                     } else {
                         syncToClients(world, data.entityUuid, false);
                     }
+                    TooManySpells.LOGGER.info("Removed {} summon: {} (null or removed)", data.summonType, data.entityUuid);
                     return true;
                 }
 
@@ -211,12 +218,25 @@ public class SummonTracker {
                     if (entity.getWorld() instanceof ServerWorld sw) {
                         syncToClients(sw, data.entityUuid, false);
                     }
+                    TooManySpells.LOGGER.info("Removed {} summon: {} (not alive)", data.summonType, data.entityUuid);
                     return true;
                 }
 
-                PlayerEntity owner = entity.getWorld().getPlayerByUuid(data.ownerUuid);
+                if (finalOwner == null) {
+                    TooManySpells.LOGGER.warn("Owner not found for summon: {} (owner UUID: {})", data.entityUuid, data.ownerUuid);
+                    if (entity.getWorld() instanceof ServerWorld sw) {
+                        spawnDespawnParticles(sw, entity);
+                    }
+                    entity.discard();
+                    ENTITY_LOOKUP.remove(data.entityUuid);
+                    if (entity.getWorld() instanceof ServerWorld sw) {
+                        syncToClients(sw, data.entityUuid, false);
+                    }
+                    return true;
+                }
 
-                if (owner == null || !owner.isAlive()) {
+                if (!finalOwner.isAlive()) {
+                    TooManySpells.LOGGER.info("Owner is dead for summon: {}", data.entityUuid);
                     if (entity.getWorld() instanceof ServerWorld sw) {
                         spawnDespawnParticles(sw, entity);
                     }
@@ -242,6 +262,7 @@ public class SummonTracker {
                 }
 
                 if (data.isExpired(currentTick)) {
+                    TooManySpells.LOGGER.info("Summon expired: {} (lifetime: {} ticks)", data.entityUuid, data.lifetimeTicks);
                     if (entity.getWorld() instanceof ServerWorld sw) {
                         spawnDespawnParticles(sw, entity);
                     }
@@ -333,17 +354,27 @@ public class SummonTracker {
     }
 
     public static void cleanupPlayer(UUID playerUuid) {
+        TooManySpells.LOGGER.info("Cleaning up summons for player: {}", playerUuid);
         List<SummonData> summons = PLAYER_SUMMONS.remove(playerUuid);
         if (summons != null) {
+            TooManySpells.LOGGER.info("Found {} summons to clean up", summons.size());
             for (SummonData data : summons) {
+                Entity entity = data.getEntity();
+                if (entity != null && !entity.isRemoved() && entity.getWorld() instanceof ServerWorld sw) {
+                    spawnDespawnParticles(sw, entity);
+                    entity.discard();
+                    syncToClients(sw, data.entityUuid, false);
+                }
                 ENTITY_LOOKUP.remove(data.entityUuid);
             }
+        } else {
+            TooManySpells.LOGGER.info("No summons found for player: {}", playerUuid);
         }
     }
 
     public static void clientRegisterSummon(UUID entityUuid) {
         CLIENT_SPELL_SUMMONS.add(entityUuid);
-        }
+    }
 
     public static void clientUnregisterSummon(UUID entityUuid) {
         CLIENT_SPELL_SUMMONS.remove(entityUuid);

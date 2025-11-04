@@ -1,6 +1,7 @@
 package net.pixeldreamstudios.tms.spell.handler;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -12,10 +13,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
 import net.pixeldreamstudios.tms.util.SummonTracker;
-import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellHelper;
+import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -85,6 +86,10 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         freyrSword.setPos(spawnPos.x, spawnPos.y, spawnPos.z);
         freyrSword.setYaw(player.getYaw());
         freyrSword.setStationaryPos(FreyrSwordEntity.NULLISH_POS);
+
+        if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE) != null) {
+            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(0.5);
+        }
 
         boolean spawned = world.spawnEntity(freyrSword);
 

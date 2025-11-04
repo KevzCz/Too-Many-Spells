@@ -10,6 +10,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.List;
+import java.util.UUID;
+
 @Mixin(FreyrSwordEntity.class)
 public class FreyrSwordSpellPositioningMixin {
 
@@ -37,31 +40,55 @@ public class FreyrSwordSpellPositioningMixin {
                 entity.setAnimationAttacking(false);
             }
         } else if (entity.getTarget() == null || entity.squaredDistanceTo(owner) > entity.getFollowRange()) {
-            positionInArc(entity, owner, data.summonIndex, getTotalSummons(owner));
+            int actualIndex = getActualIndex(entity, owner);
+            int totalSummons = getTotalSummons(owner);
+            positionInArc(entity, owner, actualIndex, totalSummons);
             entity.setAnimationAttacking(false);
         }
 
         ci.cancel();
     }
 
+    private int getActualIndex(FreyrSwordEntity entity, LivingEntity owner) {
+        if (!(owner instanceof PlayerEntity player)) {
+            return 0;
+        }
+
+        List<UUID> allSummons = SummonTracker.getPlayerSummonsByType(player.getUuid(), "freyr_sword");
+        int index = allSummons.indexOf(entity.getUuid());
+        return index >= 0 ? index : 0;
+    }
+
     private void positionInArc(FreyrSwordEntity entity, LivingEntity owner, int index, int total) {
         double radius = 2.5;
-        double arcAngle = Math.PI * 0.6;
-        double startAngle = owner.getYaw() * (Math.PI / 180.0) + Math.PI - (arcAngle / 2);
+        double arcSpread = Math.PI * 0.5;
 
-        double angleStep = total > 1 ? arcAngle / (total - 1) : 0;
-        double angle = startAngle + (angleStep * index);
+        float ownerYawRad = owner.getYaw() * (float) Math.PI / 180.0F;
 
-        double offsetX = Math.cos(angle) * radius;
-        double offsetZ = Math.sin(angle) * radius;
+        double behindAngle = ownerYawRad + Math.PI;
+
+        double offsetAngle;
+        if (total == 1) {
+            offsetAngle = 0;
+        } else {
+            double step = arcSpread / (total - 1);
+            offsetAngle = (index * step) - (arcSpread / 2.0);
+        }
+
+        double finalAngle = behindAngle + offsetAngle;
+
+        double offsetX = -Math.sin(finalAngle) * radius;
+        double offsetZ = Math.cos(finalAngle) * radius;
 
         Vec3d targetPos = owner.getPos().add(offsetX, 0, offsetZ);
+
+        float swordYaw = (float) Math.toDegrees(finalAngle);
 
         entity.updatePositionAndAngles(
                 targetPos.getX(),
                 owner.getY(),
                 targetPos.getZ(),
-                (float) (angle * (180.0 / Math.PI)),
+                swordYaw,
                 0.0F
         );
     }

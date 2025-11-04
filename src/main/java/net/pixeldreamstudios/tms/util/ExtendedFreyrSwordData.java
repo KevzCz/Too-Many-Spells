@@ -25,8 +25,7 @@ public class ExtendedFreyrSwordData {
 
         addSpellSummonUuid(owner, entityUuid);
 
-        SummonTracker.registerSummon(owner, entity, world.getTime(), lifetimeTicks, allowInteraction, SUMMON_TYPE);
-
+        SummonTracker.registerSummon(owner, entity, world.getTime(), lifetimeTicks, allowInteraction, SUMMON_TYPE, true);
     }
 
     public static void unregisterSpellSummon(PlayerEntity owner, UUID entityUuid) {
@@ -37,7 +36,6 @@ public class ExtendedFreyrSwordData {
         } else {
             SummonTracker.unregisterSummon(entityUuid);
         }
-
     }
 
     public static boolean isSpellSummon(UUID entityUuid) {
@@ -71,7 +69,6 @@ public class ExtendedFreyrSwordData {
         return summons.isEmpty() ? null : summons.get(0);
     }
 
-
     private static List<UUID> getSpellSummonUuids(LivingEntity entity) {
         NbtCompound nbt = ((IEntityDataSaver) entity).getPersistentData();
         List<UUID> uuids = new ArrayList<>();
@@ -102,7 +99,6 @@ public class ExtendedFreyrSwordData {
 
         list.add(new NbtIntArray(uuidToIntArray(swordUuid)));
         nbt.put(SPELL_SUMMONS_KEY, list);
-
     }
 
     public static void removeSpellSummonUuid(LivingEntity entity, UUID swordUuid) {
@@ -130,7 +126,6 @@ public class ExtendedFreyrSwordData {
         NbtCompound nbt = ((IEntityDataSaver) entity).getPersistentData();
         nbt.remove(SPELL_SUMMONS_KEY);
     }
-
 
     private static int[] uuidToIntArray(UUID uuid) {
         long mostSigBits = uuid.getMostSignificantBits();
