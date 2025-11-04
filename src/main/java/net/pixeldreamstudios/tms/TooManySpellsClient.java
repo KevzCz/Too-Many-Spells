@@ -27,6 +27,5 @@ public class TooManySpellsClient implements ClientModInitializer {
             SummonTracker.clientClearAll();
         });
 
-        TooManySpells.LOGGER.info("Too Many Spells client initialized!");
     }
 }

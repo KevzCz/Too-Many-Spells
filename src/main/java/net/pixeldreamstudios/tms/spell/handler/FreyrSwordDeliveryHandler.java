@@ -10,13 +10,12 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.pixeldreamstudios.tms.TooManySpells;
 import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
 import net.pixeldreamstudios.tms.util.SummonTracker;
+import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellHelper;
-import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,9 +40,6 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             return false;
         }
 
-        TooManySpells.LOGGER.info("=== FREYR SWORD SPELL CAST ===");
-        TooManySpells.LOGGER.info("Caster: {}", caster.getName().getString());
-
         Spell spell = spellEntry.value();
 
         if (spell.impacts == null || spell.impacts.isEmpty()) {
@@ -52,7 +48,6 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
 
         int maxSummons = getMaxSummons(caster);
         int currentCount = SummonTracker.getPlayerSummonCountByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
-        TooManySpells.LOGGER.info("Current Freyr Sword spell summons: {} / {}", currentCount, maxSummons);
 
         if (currentCount >= maxSummons) {
             UUID oldestUuid = SummonTracker.getOldestSummonByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
@@ -61,7 +56,6 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
                 if (oldData != null) {
                     Entity oldEntity = oldData.getEntity();
                     if (oldEntity != null) {
-                        TooManySpells.LOGGER.info("Removing oldest Freyr Sword summon (limit reached)");
                         oldEntity.discard();
                     }
                 }
@@ -95,15 +89,12 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         boolean spawned = world.spawnEntity(freyrSword);
 
         if (!spawned) {
-            TooManySpells.LOGGER.error("Failed to spawn Freyr Sword entity!");
             return;
         }
 
         UUID entityUuid = freyrSword.getUuid();
-        TooManySpells.LOGGER.info("Spawned Freyr Sword entity: {}", entityUuid);
 
         ExtendedFreyrSwordData.registerSpellSummon(player, freyrSword, world, LIFETIME_TICKS, ALLOW_INTERACTION);
-        TooManySpells.LOGGER.info("Registered Freyr Sword spell summon: {}", entityUuid);
 
         player.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0F, 1.0F);
     }

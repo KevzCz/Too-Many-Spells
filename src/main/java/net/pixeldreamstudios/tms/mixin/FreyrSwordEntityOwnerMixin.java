@@ -2,7 +2,6 @@ package net.pixeldreamstudios.tms.mixin;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.pixeldreamstudios.tms.TooManySpells;
 import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +33,6 @@ public class FreyrSwordEntityOwnerMixin {
         LivingEntity potentialOwner = entity.getWorld().getPlayerByUuid(ownerUuid);
         if (potentialOwner instanceof PlayerEntity player) {
             if (ExtendedFreyrSwordData.isSpellSummon(player, entityUuid)) {
-                TooManySpells.LOGGER.debug("Found owner for spell summon: {}", player.getName().getString());
                 cir.setReturnValue(player);
             }
         }

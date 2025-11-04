@@ -99,7 +99,6 @@ public class SummonTracker {
                     reindexSummons(playerSummons, data.summonType);
                 }
             }
-            TooManySpells.LOGGER.info("✗ Unregistered {} spell summon: {}", data.summonType, entityUuid);
         }
     }
 
@@ -204,7 +203,6 @@ public class SummonTracker {
                     } else {
                         syncToClients(world, data.entityUuid, false);
                     }
-                    TooManySpells.LOGGER.info("Removed removed/null {} summon: {}", data.summonType, data.entityUuid);
                     return true;
                 }
 
@@ -213,7 +211,6 @@ public class SummonTracker {
                     if (entity.getWorld() instanceof ServerWorld sw) {
                         syncToClients(sw, data.entityUuid, false);
                     }
-                    TooManySpells.LOGGER.info("Removed dead {} summon: {}", data.summonType, data.entityUuid);
                     return true;
                 }
 
@@ -228,8 +225,6 @@ public class SummonTracker {
                     if (entity.getWorld() instanceof ServerWorld sw) {
                         syncToClients(sw, data.entityUuid, false);
                     }
-                    TooManySpells.LOGGER.info("Removed {} summon (owner gone): {} [Owner UUID: {}, Found: {}]",
-                            data.summonType, data.entityUuid, data.ownerUuid, (owner != null));
                     return true;
                 }
 
@@ -255,7 +250,6 @@ public class SummonTracker {
                     if (entity.getWorld() instanceof ServerWorld sw) {
                         syncToClients(sw, data.entityUuid, false);
                     }
-                    TooManySpells.LOGGER.info("Removed expired {} summon: {}", data.summonType, data.entityUuid);
                     return true;
                 }
 
@@ -344,18 +338,15 @@ public class SummonTracker {
             for (SummonData data : summons) {
                 ENTITY_LOOKUP.remove(data.entityUuid);
             }
-            TooManySpells.LOGGER.info("Cleaned up {} summons for player: {}", summons.size(), playerUuid);
         }
     }
 
     public static void clientRegisterSummon(UUID entityUuid) {
         CLIENT_SPELL_SUMMONS.add(entityUuid);
-        TooManySpells.LOGGER.info("Client registered spell summon: {}", entityUuid);
-    }
+        }
 
     public static void clientUnregisterSummon(UUID entityUuid) {
         CLIENT_SPELL_SUMMONS.remove(entityUuid);
-        TooManySpells.LOGGER.info("Client unregistered spell summon: {}", entityUuid);
     }
 
     public static boolean clientIsSpellSummon(UUID entityUuid) {

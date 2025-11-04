@@ -4,7 +4,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.pixeldreamstudios.tms.TooManySpells;
 import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
 import net.pixeldreamstudios.tms.util.SummonTracker;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
@@ -24,13 +23,11 @@ public class FreyrSwordEntityInteractionMixin {
         if (entity.getWorld().isClient()) {
 
             if (SummonTracker.clientIsSpellSummon(entity.getUuid())) {
-                TooManySpells.LOGGER.info("[CLIENT] Blocking interaction with spell summon");
                 cir.setReturnValue(ActionResult.SUCCESS);
             }
         } else {
 
             if (ExtendedFreyrSwordData.isSpellSummon(player, entity.getUuid())) {
-                TooManySpells.LOGGER.info("[SERVER] Blocking interaction with spell summon");
                 cir.setReturnValue(ActionResult.PASS);
             }
         }
@@ -47,7 +44,6 @@ public class FreyrSwordEntityInteractionMixin {
 
 
         if (isAnyPlayerSpellSummon(entity)) {
-            TooManySpells.LOGGER.info("Preventing drop for spell summon");
             ci.cancel();
         }
     }
@@ -57,7 +53,6 @@ public class FreyrSwordEntityInteractionMixin {
         FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
 
         if (ExtendedFreyrSwordData.isSpellSummon(player, entity.getUuid())) {
-            TooManySpells.LOGGER.info("Preventing insert for spell summon");
             cir.setReturnValue(false);
         }
     }
@@ -72,7 +67,6 @@ public class FreyrSwordEntityInteractionMixin {
 
         if (source.getAttacker() instanceof PlayerEntity attacker) {
             if (ExtendedFreyrSwordData.isSpellSummon(attacker, entity.getUuid())) {
-                TooManySpells.LOGGER.info("Blocking owner damage to spell summon");
                 cir.setReturnValue(false);
             }
         }

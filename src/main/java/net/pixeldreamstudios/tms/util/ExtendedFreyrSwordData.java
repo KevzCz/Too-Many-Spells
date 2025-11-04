@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
-import net.pixeldreamstudios.tms.TooManySpells;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.soulsweaponry.entitydata.IEntityDataSaver;
 
@@ -28,7 +27,6 @@ public class ExtendedFreyrSwordData {
 
         SummonTracker.registerSummon(owner, entity, world.getTime(), lifetimeTicks, allowInteraction, SUMMON_TYPE);
 
-        TooManySpells.LOGGER.info("Fully registered Freyr Sword spell summon: {}", entityUuid);
     }
 
     public static void unregisterSpellSummon(PlayerEntity owner, UUID entityUuid) {
@@ -40,7 +38,6 @@ public class ExtendedFreyrSwordData {
             SummonTracker.unregisterSummon(entityUuid);
         }
 
-        TooManySpells.LOGGER.info("Fully unregistered Freyr Sword spell summon: {}", entityUuid);
     }
 
     public static boolean isSpellSummon(UUID entityUuid) {
@@ -106,7 +103,6 @@ public class ExtendedFreyrSwordData {
         list.add(new NbtIntArray(uuidToIntArray(swordUuid)));
         nbt.put(SPELL_SUMMONS_KEY, list);
 
-        TooManySpells.LOGGER.debug("Added {} to player NBT", swordUuid);
     }
 
     public static void removeSpellSummonUuid(LivingEntity entity, UUID swordUuid) {
@@ -127,7 +123,6 @@ public class ExtendedFreyrSwordData {
             }
 
             nbt.put(SPELL_SUMMONS_KEY, newList);
-            TooManySpells.LOGGER.debug("Removed {} from player NBT", swordUuid);
         }
     }
 
