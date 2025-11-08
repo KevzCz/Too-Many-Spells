@@ -26,7 +26,8 @@
 		]
 	},
 	"mixins": [
-		"too-many-spells.mixins.json"
+		"too-many-spells.mixins.json",
+		"tms-soulsweapons.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.0",

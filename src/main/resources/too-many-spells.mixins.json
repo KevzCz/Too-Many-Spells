@@ -3,10 +3,7 @@
 	"package": "net.pixeldreamstudios.tms.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"FreyrSwordEntityInteractionMixin",
-		"FreyrSwordEntityOwnerMixin",
-		"FreyrSwordSpellPositioningMixin",
-		"FreyrSwordIgnoreInvulnerabilityMixin"
+
 	],
 	"injectors": {
 		"defaultRequire": 1

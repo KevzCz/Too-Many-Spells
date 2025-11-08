@@ -1,4 +1,4 @@
-package net.pixeldreamstudios.tms.util;
+package net.pixeldreamstudios.tms.util.soulsweapons;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;

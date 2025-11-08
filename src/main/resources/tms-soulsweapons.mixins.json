@@ -1,0 +1,116 @@
+{
+	"required": true,
+	"package": "net.pixeldreamstudios.tms.mixin.soulsweapons",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"HolyMoonlightGreatswordMixin",
+		"MoonlightGreatswordMixin",
+		"MoonlightShortswordMixin",
+		"BluemoonShortswordMixin",
+		"DarkMoonGreatswordMixin",
+		"PureMoonlightGreatswordMixin",
+		"MasterSwordMixin",
+
+		"BloodthirsterMixin",
+		"DarkinBladeMixin",
+
+		"DragonslayerSwordspearEntityMixin",
+		"DragonslayerSwordspearStormAttributionMixin",
+
+		"DragonStaffMixin",
+		"DragonStaffProjectileMixin",
+
+		"LeviathanAxeMixin",
+		"LeviathanAxeEntityMixin",
+
+		"WhirligigSawbladeMixin",
+
+		"LichBaneMixin",
+
+		"NightfallMixin",
+
+		"NightsEdgeItemMixin",
+
+		"MjolnirWarmupLightningAttributionMixin",
+		"MjolnirProjectileDamageMixin",
+
+		"FrostmourneMixin",
+
+		"SoulmassMixin",
+		"RimeSpectreFrostBeamScalingMixin",
+
+		"EvokerFangsSoulmassScalingMixin",
+		"WitherSkullSoulScalingMixin",
+		"LightningDamageScalingMixin",
+
+		"GhostGlaiveMixin",
+		"BladeDanceAoEDamageScalingMixin",
+
+		"TonitrusLightningScalingMixin",
+		"DragonbaneMixin",
+
+		"ExcaliburMixin",
+
+		"DawnbreakerMixin",
+		"EmpoweredDawnbreakerMixin",
+
+		"BloodlustMixin",
+		"DragonslayerSwordBerserkMixin",
+
+		"MoonveilDamageScalingMixin",
+
+		"SupernovaMixin",
+		"SupernovaWarmupMoltenMetalMixin",
+		"DamagingWarmupEntityDamageScaleMixin",
+		"MoltenMetalDamageScaleMixin",
+
+		"DraupnirSpearEntityMixin",
+		"DraupnirSpearMixin",
+
+		"UmbralTrespassMixin",
+		"UmbralTrespassDataAttackerMixin",
+
+		"CometSpearEntityMixin",
+
+		"KrakenSlayerTrueDamageScalingMixin",
+		"GaleforceAbilityScalingMixin",
+		"DarkmoonLongbowAbilityScalingMixin",
+
+		"item_attribute.MjolnirAttributeMixin",
+		"item_attribute.DarkMoonGreatswordAttributeMixin",
+		"item_attribute.ForlornScytheAttributeMixin",
+		"item_attribute.LeviathanAxeAttributeMixin",
+		"item_attribute.LichBaneAttributeMixin",
+		"item_attribute.MasterSwordAttributeMixin",
+		"item_attribute.NightfallAttributeMixin",
+		"item_attribute.DragonbaneAttributeMixin",
+		"item_attribute.DragonStaffAttributeMixin",
+		"item_attribute.ExcaliburAttributeMixin",
+		"item_attribute.FrostmourneAttributeMixin",
+		"item_attribute.NightsEdgeAttributeMixin",
+		"item_attribute.SoulReaperAttributeMixin",
+		"item_attribute.SupernovaAttributeMixin",
+		"item_attribute.TonitrusAttributeMixin",
+		"item_attribute.GhostGlaiveAttributeMixin",
+		"item_attribute.DawnbreakerAttributeMixin",
+		"item_attribute.EmpoweredDawnbreakerAttributeMixin",
+		"item_attribute.DarkmoonLongbowAttributeMixin",
+		"item_attribute.FreyrSwordAttributeMixin",
+
+		"entity.RemnantSpawnMixin",
+		"entity.FreyrSwordEntityMixin",
+		"entity.FreyrSwordGoalMixin",
+		"entity.FreyrSwordIgnoreInvulnerabilityMixin",
+
+		"entity.spell.FreyrSwordEntityInteractionMixin",
+		"entity.spell.FreyrSwordEntityOwnerMixin",
+		"entity.spell.FreyrSwordSpellPositioningMixin"
+
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

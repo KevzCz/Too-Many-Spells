@@ -1,0 +1,75 @@
+{
+  "school": "spell_power:soul",
+  "range": 20.0,
+  "tier": 2,
+  "learn": {},
+  "active": {
+    "cast": {
+      "duration": 4.0,
+      "channel_ticks": 20,
+      "animation": "spell_engine:two_handed_channeling",
+      "sound": {
+        "id": "spell_engine:generic_arcane_casting",
+        "randomness": 0.0
+      }
+    }
+  },
+  "release": {
+    "animation": "spell_engine:two_handed_release",
+    "sound": {
+      "id": "minecraft:entity.evoker.cast_spell",
+      "pitch": 1.2
+    }
+  },
+  "deliver": {
+    "type": "CUSTOM",
+    "custom": {
+      "handler": "too-many-spells:summon_freyr_sword"
+    }
+  },
+  "impacts": [
+    {
+      "school": "spell_power:soul",
+      "action": {
+        "type": "SPAWN",
+        "damage": {
+          "spell_power_coefficient": 0.065
+        },
+        "spawns": [
+          {
+            "entity_type_id": "soulsweapons:freyr_sword_entity",
+            "time_to_live_seconds": 30,
+            "placement": {
+              "location_offset_by_look": 2.0,
+              "apply_yaw": true
+            }
+          }
+        ]
+      },
+      "particles": [
+        {
+          "particle_id": "minecraft:soul_fire_flame",
+          "origin": "CENTER",
+          "shape": "SPHERE",
+          "count": 20.0,
+          "min_speed": 0.1,
+          "max_speed": 0.2
+        }
+      ],
+      "sound": {
+        "id": "minecraft:block.beacon.activate",
+        "volume": 0.5,
+        "pitch": 1.5
+      }
+    }
+  ],
+  "cost": {
+    "cooldown": {
+      "duration": 1.0,
+      "proportional": true
+    },
+    "item": {
+      "id": "runes:soul_stone"
+    }
+  }
+}

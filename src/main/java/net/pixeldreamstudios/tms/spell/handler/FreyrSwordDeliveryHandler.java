@@ -15,11 +15,13 @@ import net.pixeldreamstudios.summonerlib.attribute.SummonerAttributes;
 import net.pixeldreamstudios.summonerlib.data.SummonData;
 import net.pixeldreamstudios.summonerlib.manager.SummonManager;
 import net.pixeldreamstudios.summonerlib.tracker.SummonTracker;
-import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
+import net.pixeldreamstudios.tms.util.soulsweapons.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellHelper;
+import net.spell_power.api.SpellPower;
+import net.spell_power.api.SpellSchools;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -69,7 +71,7 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         for (Spell.Impact impact : spell.impacts) {
             if (impact.action != null && impact.action.spawns != null) {
                 for (Spell.Impact.Action.Spawn spawnData : impact.action.spawns) {
-                    spawnFreyrSword(serverWorld, caster, spawnData);
+                    spawnFreyrSword(serverWorld, caster, spawnData, impact);
                 }
             }
         }
@@ -77,7 +79,7 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
         return true;
     }
 
-    private void spawnFreyrSword(ServerWorld world, PlayerEntity player, Spell.Impact.Action.Spawn spawnData) {
+    private void spawnFreyrSword(ServerWorld world, PlayerEntity player, Spell.Impact.Action.Spawn spawnData, Spell.Impact impact) {
         Identifier itemId = Identifier.of("soulsweapons", "freyr_sword");
         var item = Registries.ITEM.get(itemId);
         ItemStack stack = new ItemStack(item);
@@ -93,11 +95,22 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(0.75);
         }
 
-        double durationMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DURATION);
-        int lifetime = (int) (BASE_LIFETIME_TICKS * durationMultiplier);
+        SpellPower.Result soulPowerResult = SpellPower.getSpellPower(SpellSchools.SOUL, player);
+        double soulPower = soulPowerResult.baseValue();
 
-        double damageMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DAMAGE);
-        double healthMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_HEALTH);
+        float coefficient = 0.04F;
+        if (impact.action != null && impact.action.damage != null) {
+            coefficient = impact.action.damage.spell_power_coefficient;
+        }
+
+        double soulMultiplier = 1.0 + (soulPower * coefficient);
+
+        double durationMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DURATION);
+        double totalDurationMultiplier = Math.min(2.0, durationMultiplier * soulMultiplier);
+        int lifetime = (int) (BASE_LIFETIME_TICKS * totalDurationMultiplier);
+
+        double damageMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DAMAGE) * soulMultiplier;
+        double healthMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_HEALTH) * soulMultiplier;
 
         if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE) != null) {
             double baseDamage = freyrSword.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);

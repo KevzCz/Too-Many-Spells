@@ -1,11 +1,11 @@
-package net.pixeldreamstudios.tms.mixin;
+package net.pixeldreamstudios.tms.mixin.soulsweapons.entity.spell;
 
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.pixeldreamstudios.summonerlib.tracker.ClientSummonTracker;
-import net.pixeldreamstudios.tms.util.ExtendedFreyrSwordData;
+import net.pixeldreamstudios.tms.util.soulsweapons.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

@@ -1,0 +1,56 @@
+{
+  "school": "spell_power:fire",
+  "range": 6.0,
+  "group": "secondary",
+  "tier": 1,
+  "learn": {},
+  "type": "PASSIVE",
+  "passive": {
+    "triggers": [
+      {
+        "type": "MELEE_IMPACT"
+      }
+    ]
+  },
+  "release": {
+    "sound": {
+      "id": "minecraft:entity.blaze.shoot",
+      "pitch": 0.8
+    }
+  },
+  "target": {
+    "type": "FROM_TRIGGER"
+  },
+  "deliver": {
+    "type": "CUSTOM",
+    "custom": {
+      "handler": "too-many-spells:flame_pillar_proc"
+    }
+  },
+  "impacts": [
+    {
+      "school": "spell_power:fire",
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 0.5,
+          "knockback": 2.0
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "minecraft:flame",
+          "origin": "FEET",
+          "shape": "PILLAR",
+          "count": 30.0,
+          "min_speed": 0.3,
+          "max_speed": 2.0
+        }
+      ],
+      "sound": {
+        "id": "minecraft:entity.blaze.shoot",
+        "pitch": 0.8
+      }
+    }
+  ]
+}
