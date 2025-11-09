@@ -1,6 +1,5 @@
 package net.pixeldreamstudios.tms.spell.handler;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -11,25 +10,20 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.pixeldreamstudios.summonerlib.attribute.SummonerAttributes;
-import net.pixeldreamstudios.summonerlib.data.SummonData;
-import net.pixeldreamstudios.summonerlib.manager.SummonManager;
-import net.pixeldreamstudios.summonerlib.tracker.SummonTracker;
+import net.pixeldreamstudios.summonerlib.util.SummonAttributeApplicator;
+import net.pixeldreamstudios.summonerlib.util.SummonLimitHandler;
 import net.pixeldreamstudios.tms.util.soulsweapons.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import net.spell_engine.api.spell.Spell;
 import net.spell_engine.api.spell.event.SpellHandlers;
 import net.spell_engine.internals.SpellHelper;
-import net.spell_power.api.SpellPower;
 import net.spell_power.api.SpellSchools;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
 
 public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
 
-    private static final int BASE_LIFETIME_TICKS = 600;
     private static final boolean ALLOW_INTERACTION = false;
 
     @Override
@@ -51,22 +45,10 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             return false;
         }
 
-        int maxSummons = SummonManager.getMaxSummons(caster);
-        int currentCount = SummonTracker.getPlayerSummonCountByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
-
-        if (currentCount >= maxSummons) {
-            UUID oldestUuid = SummonTracker.getOldestSummonByType(caster.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
-            if (oldestUuid != null) {
-                SummonData oldData = SummonTracker.getSummonData(oldestUuid);
-                if (oldData != null) {
-                    Entity oldEntity = oldData.getEntity();
-                    if (oldEntity != null) {
-                        oldEntity.discard();
-                    }
-                }
-                ExtendedFreyrSwordData.unregisterSpellSummon(caster, oldestUuid);
-            }
-        }
+        SummonLimitHandler.handleSummonLimit(
+                caster,
+                ExtendedFreyrSwordData.SUMMON_TYPE
+        );
 
         for (Spell.Impact impact : spell.impacts) {
             if (impact.action != null && impact.action.spawns != null) {
@@ -95,35 +77,21 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
             freyrSword.getAttributeInstance(EntityAttributes.GENERIC_SCALE).setBaseValue(0.75);
         }
 
-        SpellPower.Result soulPowerResult = SpellPower.getSpellPower(SpellSchools.SOUL, player);
-        double soulPower = soulPowerResult.baseValue();
-
-        float coefficient = 0.04F;
+        float coefficient = 0.065F;
         if (impact.action != null && impact.action.damage != null) {
             coefficient = impact.action.damage.spell_power_coefficient;
         }
 
-        double soulMultiplier = 1.0 + (soulPower * coefficient);
+        SummonAttributeApplicator.AttributeConfig config = new SummonAttributeApplicator.AttributeConfig(
+                player,
+                freyrSword,
+                coefficient,
+                SpellSchools.SOUL
+        );
 
-        double durationMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DURATION);
-        double totalDurationMultiplier = Math.min(2.0, durationMultiplier * soulMultiplier);
-        int lifetime = (int) (BASE_LIFETIME_TICKS * totalDurationMultiplier);
+        SummonAttributeApplicator.applyAllAttributes(config);
 
-        double damageMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_DAMAGE) * soulMultiplier;
-        double healthMultiplier = player.getAttributeValue(SummonerAttributes.SUMMON_HEALTH) * soulMultiplier;
-
-        if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE) != null) {
-            double baseDamage = freyrSword.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE)
-                    .setBaseValue(baseDamage * damageMultiplier);
-        }
-
-        if (freyrSword.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH) != null) {
-            double baseHealth = freyrSword.getAttributeValue(EntityAttributes.GENERIC_MAX_HEALTH);
-            freyrSword.getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH)
-                    .setBaseValue(baseHealth * healthMultiplier);
-            freyrSword.setHealth(freyrSword.getMaxHealth());
-        }
+        int lifetime = SummonAttributeApplicator.calculateLifetime(player, coefficient, SpellSchools.SOUL);
 
         boolean spawned = world.spawnEntity(freyrSword);
 
