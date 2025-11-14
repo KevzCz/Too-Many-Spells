@@ -58,6 +58,7 @@ dependencies {
 	modImplementation("maven.modrinth:spell-power:${project.spell_power_version}+1.21.1-fabric")
 	modImplementation "maven.modrinth:ranged-weapon-api:${project.ranged_weapon_api_version}"
 	modImplementation files("lib/summoner-lib-1.0.0.jar")
+	modImplementation "curse.maven:critical-strike-1379562:7203013"
 	// Marium's Soulslike Weaponry
 	modCompileOnly "curse.maven:mariums-soulslike-weaponry-632066:6948448"
 	modCompileOnly("software.bernie.geckolib:geckolib-fabric-${geckolib_version}")

@@ -4,6 +4,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import net.pixeldreamstudios.summonerlib.tracker.SummonTracker;
+import net.pixeldreamstudios.tms.spell.handler.TrueFreyrSwordDeliveryHandler;
 import net.pixeldreamstudios.tms.util.soulsweapons.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -22,7 +23,14 @@ public class FreyrSwordSpellPositioningMixin {
         FreyrSwordEntity entity = (FreyrSwordEntity) (Object) this;
 
         var data = SummonTracker.getSummonData(entity.getUuid());
-        if (data == null || !ExtendedFreyrSwordData.SUMMON_TYPE.equals(data.summonType)) {
+        if (data == null) {
+            return;
+        }
+
+        boolean isNormalFreyr = ExtendedFreyrSwordData.SUMMON_TYPE.equals(data.summonType);
+        boolean isTrueFreyr = TrueFreyrSwordDeliveryHandler.TRUE_FREYR_SWORD_TYPE.equals(data.summonType);
+
+        if (!isNormalFreyr && !isTrueFreyr) {
             return;
         }
 
@@ -41,8 +49,8 @@ public class FreyrSwordSpellPositioningMixin {
                 entity.setAnimationAttacking(false);
             }
         } else if (entity.getTarget() == null || entity.squaredDistanceTo(owner) > entity.getFollowRange()) {
-            int actualIndex = getActualIndex(entity, owner);
-            int totalSummons = getTotalSummons(owner);
+            int actualIndex = getActualIndex(entity, owner, data.summonType);
+            int totalSummons = getTotalSummons(owner, data.summonType);
             positionInArc(entity, owner, actualIndex, totalSummons);
             entity.setAnimationAttacking(false);
         }
@@ -50,14 +58,14 @@ public class FreyrSwordSpellPositioningMixin {
         ci.cancel();
     }
 
-    private int getActualIndex(FreyrSwordEntity entity, LivingEntity owner) {
+    private int getActualIndex(FreyrSwordEntity entity, LivingEntity owner, String summonType) {
         if (!(owner instanceof PlayerEntity player)) {
             return 0;
         }
 
         List<UUID> allSummons = SummonTracker.getPlayerSummonsByType(
                 player.getUuid(),
-                ExtendedFreyrSwordData.SUMMON_TYPE
+                summonType
         );
         int index = allSummons.indexOf(entity.getUuid());
         return index >= 0 ? index : 0;
@@ -94,11 +102,11 @@ public class FreyrSwordSpellPositioningMixin {
         );
     }
 
-    private int getTotalSummons(LivingEntity owner) {
+    private int getTotalSummons(LivingEntity owner, String summonType) {
         if (owner instanceof PlayerEntity player) {
             return SummonTracker.getPlayerSummonCountByType(
                     player.getUuid(),
-                    ExtendedFreyrSwordData.SUMMON_TYPE
+                    summonType
             );
         }
         return 1;

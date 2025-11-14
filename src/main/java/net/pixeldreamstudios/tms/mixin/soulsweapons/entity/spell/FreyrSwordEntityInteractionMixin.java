@@ -2,8 +2,10 @@ package net.pixeldreamstudios.tms.mixin.soulsweapons.entity.spell;
 
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.pixeldreamstudios.summonerlib.manager.SummonManager;
 import net.pixeldreamstudios.summonerlib.tracker.ClientSummonTracker;
 import net.pixeldreamstudios.tms.util.soulsweapons.ExtendedFreyrSwordData;
 import net.soulsweaponry.entity.mobs.FreyrSwordEntity;
@@ -79,7 +81,11 @@ public class FreyrSwordEntityInteractionMixin {
         if (entity.getOwnerUuid() != null) {
             PlayerEntity owner = entity.getWorld().getPlayerByUuid(entity.getOwnerUuid());
             if (owner != null && ExtendedFreyrSwordData.isSpellSummon(entity.getUuid())) {
-                ExtendedFreyrSwordData.unregisterSpellSummon(owner, entity.getUuid());
+                ExtendedFreyrSwordData.removeSpellSummonUuid(owner, entity.getUuid());
+
+                if (entity.getWorld() instanceof ServerWorld serverWorld) {
+                    SummonManager.unregisterSummon(owner, entity.getUuid(), ExtendedFreyrSwordData.SUMMON_TYPE);
+                }
             }
         }
     }

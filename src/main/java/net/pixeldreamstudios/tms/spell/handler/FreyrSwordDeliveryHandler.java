@@ -10,6 +10,8 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.pixeldreamstudios.summonerlib.api.SummonBuilder;
+import net.pixeldreamstudios.summonerlib.manager.SummonLifecycleManager;
 import net.pixeldreamstudios.summonerlib.util.SummonAttributeApplicator;
 import net.pixeldreamstudios.summonerlib.util.SummonLimitHandler;
 import net.pixeldreamstudios.tms.util.soulsweapons.ExtendedFreyrSwordData;
@@ -47,7 +49,8 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
 
         SummonLimitHandler.handleSummonLimit(
                 caster,
-                ExtendedFreyrSwordData.SUMMON_TYPE
+                ExtendedFreyrSwordData.SUMMON_TYPE,
+                1
         );
 
         for (Spell.Impact impact : spell.impacts) {
@@ -93,15 +96,21 @@ public class FreyrSwordDeliveryHandler implements SpellHandlers.CustomDelivery {
 
         int lifetime = SummonAttributeApplicator.calculateLifetime(player, coefficient, SpellSchools.SOUL);
 
-        boolean spawned = world.spawnEntity(freyrSword);
+        FreyrSwordEntity spawned = SummonBuilder.create(player, freyrSword, world)
+                .withType(ExtendedFreyrSwordData.SUMMON_TYPE)
+                .withLifetime(lifetime)
+                .allowInteraction(ALLOW_INTERACTION)
+                .slotCost(1)
+                .group("freyr_swords")
+                .onSpawn(sword -> {
+                    ExtendedFreyrSwordData.addSpellSummonUuid(player, sword.getUuid());
+                    SummonLifecycleManager.spawnSummonParticles(world, sword);
+                })
+                .build();
 
-        if (!spawned) {
-            return;
+        if (spawned != null) {
+            player.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0F, 1.0F);
         }
-
-        ExtendedFreyrSwordData.registerSpellSummon(player, freyrSword, world, lifetime, ALLOW_INTERACTION);
-
-        player.playSound(SoundEvents.ENTITY_ZOMBIE_VILLAGER_CONVERTED, 1.0F, 1.0F);
     }
 
     private Vec3d calculateSpawnPosition(PlayerEntity player, Spell.EntityPlacement placement) {

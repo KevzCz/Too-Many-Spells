@@ -35,7 +35,8 @@
 		"java": ">=21",
 		"fabric-api": "*",
 		"spell_engine": "*",
-		"summoner-lib": "*"
+		"summoner-lib": "*",
+		"critical_strike": "*"
 	},
 	"suggests": {
 		"another-mod": "*"

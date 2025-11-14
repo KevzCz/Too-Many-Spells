@@ -19,7 +19,7 @@ public class SoulslikeWeaponrySpells {
 
     public static final Entry SUMMON_FREYR_SWORD = add(createSummonFreyrSword());
     public static final Entry FLAME_PILLAR_PROC = add(createFlamePillarProc());
-
+    public static final Entry SUMMON_TRUE_FREYR_SWORD = add(createSummonTrueFreyrSword());
     private static Entry add(Entry entry) {
         entries.add(entry);
         return entry;
@@ -155,6 +155,90 @@ public class SoulslikeWeaponrySpells {
         impact.sound = new Sound("minecraft:entity.blaze.shoot", 1.0F, 0.8F, 0.1F);
 
         spell.impacts = List.of(impact);
+
+        return new Entry(id, spell);
+    }
+    private static Entry createSummonTrueFreyrSword() {
+        var id = Identifier.of(TooManySpells.MOD_ID, "summon_true_freyr_sword");
+
+        Spell spell = new Spell();
+        spell.school = SpellSchools.SOUL;
+        spell.range = 20.0F;
+        spell.tier = 3;
+        spell.type = Spell.Type.ACTIVE;
+
+        spell.learn = new Spell.Learn();
+
+        spell.active = new Spell.Active();
+        spell.active.cast = new Spell.Active.Cast();
+        spell.active.cast.duration = 1.0F;
+        spell.active.cast.animation = "spell_engine:two_handed_channeling";
+
+        SpellBuilder.Casting.channel(spell, 8, 40);
+        spell.active.cast.animation = "spell_engine:two_handed_channeling";
+        spell.active.cast.sound = new Sound(SpellEngineSounds.GENERIC_ARCANE_CASTING.id(), 0);
+
+        spell.release = new Spell.Release();
+        spell.release.animation = "spell_engine:two_handed_release";
+        spell.release.sound = new Sound("minecraft:entity.wither.spawn", 1.0F, 1.5F, 0.1F);
+
+        spell.target = new Spell.Target();
+        spell.target.type = Spell.Target.Type.CASTER;
+
+        spell.deliver = new Spell.Delivery();
+        spell.deliver.type = Spell.Delivery.Type.CUSTOM;
+        spell.deliver.custom = new Spell.Delivery.Custom();
+        spell.deliver.custom.handler = TooManySpells.MOD_ID + ":summon_true_freyr_sword";
+
+        Spell.Impact impact = new Spell.Impact();
+        impact.school = SpellSchools.SOUL;
+        impact.action = new Spell.Impact.Action();
+        impact.action.type = Spell.Impact.Action.Type.SPAWN;
+
+        impact.action.damage = new Spell.Impact.Action.Damage();
+        impact.action.damage.spell_power_coefficient = 0.13F;
+
+        List<Spell.Impact.Action.Spawn> spawns = new ArrayList<>();
+        Spell.Impact.Action.Spawn spawn = new Spell.Impact.Action.Spawn();
+        spawn.entity_type_id = "soulsweapons:freyr_sword_entity";
+        spawn.time_to_live_seconds = 45;
+        spawn.placement = new Spell.EntityPlacement();
+        spawn.placement.location_offset_by_look = 2.5F;
+        spawn.placement.apply_yaw = true;
+        spawns.add(spawn);
+        impact.action.spawns = spawns;
+
+        impact.particles = new ParticleBatch[2];
+        impact.particles[0] = new ParticleBatch(
+                "minecraft:soul_fire_flame",
+                ParticleBatch.Shape.SPHERE,
+                ParticleBatch.Origin.CENTER,
+                40,
+                0.2F,
+                0.3F
+        );
+        impact.particles[1] = new ParticleBatch(
+                "minecraft:end_rod",
+                ParticleBatch.Shape.SPHERE,
+                ParticleBatch.Origin.CENTER,
+                20,
+                0.15F,
+                0.25F
+        );
+
+        impact.sound = new Sound("minecraft:block.beacon.power_select", 1.0F, 1.5F, 0.1F);
+
+        spell.impacts = List.of(impact);
+
+        spell.cost = new Spell.Cost();
+        spell.cost.cooldown = new Spell.Cost.Cooldown();
+        spell.cost.cooldown.duration = 2.0F;
+        spell.cost.cooldown.proportional = true;
+        spell.cost.durability = 2;
+
+        spell.cost.item = new Spell.Cost.Item();
+        spell.cost.item.id = "runes:soul_stone";
+        spell.cost.item.amount = 2;
 
         return new Entry(id, spell);
     }

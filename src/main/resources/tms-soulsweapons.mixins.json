@@ -1,7 +1,8 @@
 {
-	"required": true,
+	"required": false,
 	"package": "net.pixeldreamstudios.tms.mixin.soulsweapons",
 	"compatibilityLevel": "JAVA_21",
+	"plugin": "net.pixeldreamstudios.tms.mixin.TMSMixinPlugin",
 	"mixins": [
 		"HolyMoonlightGreatswordMixin",
 		"MoonlightGreatswordMixin",
@@ -104,11 +105,12 @@
 
 		"entity.spell.FreyrSwordEntityInteractionMixin",
 		"entity.spell.FreyrSwordEntityOwnerMixin",
-		"entity.spell.FreyrSwordSpellPositioningMixin"
+		"entity.spell.FreyrSwordSpellPositioningMixin",
+		"entity.spell.FreyrSwordGoalAttackMixin"
 
 	],
 	"injectors": {
-		"defaultRequire": 1
+		"defaultRequire": 0
 	},
 	"overwrites": {
 		"requireAnnotations": true

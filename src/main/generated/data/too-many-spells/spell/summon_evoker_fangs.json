@@ -1,0 +1,67 @@
+{
+  "school": "spell_power:soul",
+  "range": 30.0,
+  "tier": 2,
+  "learn": {},
+  "active": {
+    "cast": {
+      "duration": 6.0,
+      "channel_ticks": 30,
+      "sound": {
+        "id": "spell_engine:generic_arcane_casting",
+        "randomness": 0.0
+      }
+    }
+  },
+  "release": {
+    "animation": "spell_engine:two_handed_release",
+    "sound": {
+      "id": "minecraft:entity.evoker.cast_spell"
+    }
+  },
+  "target": {
+    "type": "AIM",
+    "aim": {
+      "required": true
+    }
+  },
+  "deliver": {
+    "type": "CUSTOM",
+    "custom": {
+      "handler": "too-many-spells:summon_evoker_fangs"
+    }
+  },
+  "impacts": [
+    {
+      "school": "spell_power:soul",
+      "action": {
+        "type": "DAMAGE",
+        "damage": {
+          "spell_power_coefficient": 0.5
+        }
+      },
+      "particles": [
+        {
+          "particle_id": "minecraft:soul_fire_flame",
+          "origin": "FEET",
+          "shape": "PILLAR",
+          "count": 20.0,
+          "min_speed": 0.3,
+          "max_speed": 1.5
+        }
+      ],
+      "sound": {
+        "id": "minecraft:entity.evoker_fangs.attack"
+      }
+    }
+  ],
+  "cost": {
+    "cooldown": {
+      "duration": 8.0,
+      "proportional": true
+    },
+    "item": {
+      "id": "runes:soul_stone"
+    }
+  }
+}
